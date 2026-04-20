@@ -1,8 +1,14 @@
+use crate::account::commands::{
+  add_auth_server, add_player_offline, delete_auth_server, delete_player, refresh_player,
+  retrieve_auth_server_list, retrieve_other_launcher_account_info, retrieve_player_list,
+  update_player_skin_offline_preset,
+};
+use crate::account::models::{AccountError, Player, PresetRole};
 use crate::intelligence::mcp_server::launcher::McpContext;
 use crate::mcp_tool;
 use rmcp::handler::server::tool::ToolRoute;
 
-fn strip_sensitive_player_info(players: &mut [crate::account::models::Player]) {
+fn strip_sensitive_player_info(players: &mut [Player]) {
   for player in players {
     player.avatar = Vec::new();
     player.textures = Vec::new();
@@ -17,7 +23,7 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
       "retrieve_player_list",
       "Retrieve all Minecraft account(player) profiles stored in the launcher, including offline, Microsoft and 3rd-party authenticated accounts.",
       |app, _params: rmcp::model::JsonObject| async move {
-        let mut players = crate::account::commands::retrieve_player_list(app)?;
+        let mut players = retrieve_player_list(app)?;
         // remove token and base64 texture data in MCP responses to reduce context length.
         strip_sensitive_player_info(&mut players);
         Ok(players)
@@ -25,7 +31,7 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
     ),
     mcp_tool!(
       "add_player_offline",
-      crate::account::commands::add_player_offline,
+      add_player_offline,
       "Add a new offline Minecraft player account to the launcher. Offline accounts do not require Microsoft or 3rd-party authentication and can be used for local/LAN play.",
       #[serde(deny_unknown_fields)]
       {
@@ -67,12 +73,12 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
         preset_role: String,
       } => async move {
         let preset_role = match params.preset_role.trim().to_ascii_lowercase().as_str() {
-          "steve" => crate::account::models::PresetRole::Steve,
-          "alex" => crate::account::models::PresetRole::Alex,
-          _ => return Err(crate::account::models::AccountError::Invalid.into()),
+          "steve" => PresetRole::Steve,
+          "alex" => PresetRole::Alex,
+          _ => return Err(AccountError::Invalid.into()),
         };
 
-        crate::account::commands::update_player_skin_offline_preset(
+        update_player_skin_offline_preset(
           app,
           params.player_id,
           preset_role,
@@ -91,15 +97,15 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
         confirm: bool,
       } => async move {
         if !params.confirm {
-          return Err(crate::account::models::AccountError::Invalid.into());
+          return Err(AccountError::Invalid.into());
         }
 
-        crate::account::commands::delete_player(app, params.player_id).await
+        delete_player(app, params.player_id).await
       }
     ),
     mcp_tool!(
       "refresh_player",
-      crate::account::commands::refresh_player,
+      refresh_player,
       "Refresh authentication for a Microsoft or 3rd-party player account. Offline players cannot be refreshed. Player ID can be obtained from retrieve_player_list tool.",
       #[serde(deny_unknown_fields)]
       {
@@ -109,12 +115,12 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
     ),
     mcp_tool!(
       sync "retrieve_auth_server_list",
-      crate::account::commands::retrieve_auth_server_list,
+      retrieve_auth_server_list,
       "Retrieve configured 3rd-party authentication servers."
     ),
     mcp_tool!(
       "add_auth_server",
-      crate::account::commands::add_auth_server,
+      add_auth_server,
       "Add a 3rd-party authentication server by its normalized authlib-injector auth URL.",
       #[serde(deny_unknown_fields)]
       {
@@ -134,10 +140,10 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
         confirm: bool,
       } => async move {
         if !params.confirm {
-          return Err(crate::account::models::AccountError::Invalid.into());
+          return Err(AccountError::Invalid.into());
         }
 
-        crate::account::commands::delete_auth_server(app, params.url)
+        delete_auth_server(app, params.url)
       }
     ),
     mcp_tool!(
@@ -152,11 +158,11 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
         let launcher_type = match params.launcher_type.trim().to_ascii_lowercase().as_str() {
           "hmcl" => crate::account::helpers::import::ImportLauncherType::HMCL,
           "multimc" => crate::account::helpers::import::ImportLauncherType::MultiMC,
-          _ => return Err(crate::account::models::AccountError::Invalid.into()),
+          _ => return Err(AccountError::Invalid.into()),
         };
 
         let (mut players, auth_servers) =
-          crate::account::commands::retrieve_other_launcher_account_info(app, launcher_type).await?;
+          retrieve_other_launcher_account_info(app, launcher_type).await?;
         strip_sensitive_player_info(&mut players);
 
         Ok(serde_json::json!({
