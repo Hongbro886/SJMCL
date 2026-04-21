@@ -8,7 +8,7 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
   vec![
     mcp_tool!(
       "retrieve_extension_list",
-      "Retrieve installed launcher extensions. Icon image payloads are stripped from MCP responses to reduce context length.",
+      "Retrieve installed launcher extensions.",
       |app, _params: rmcp::model::JsonObject| async move {
         let mut extensions = retrieve_extension_list(app)?;
         for extension in &mut extensions {

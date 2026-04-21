@@ -25,15 +25,15 @@ pub fn tool_routes() -> Vec<ToolRoute<McpContext>> {
     mcp_tool!(
       "fetch_news_sources_info",
       fetch_news_sources_info,
-      "Retrieve configured news source metadata, including endpoint URLs used by fetch_news_post_summaries."
+      "Retrieve configured community news source metadata, including endpoint URLs used by fetch_news_post_summaries."
     ),
     mcp_tool!(
       "fetch_news_post_summaries",
-      "Fetch news post summaries from one or more Discover page source endpoints. Use fetch_news_sources_info first to get source endpoint URLs.",
+      "Fetch news post summaries from one or more community news source endpoints with cursor pagination. Use fetch_news_sources_info first to get source endpoint URLs. To load more, pass each source's previous response cursor from `cursors[url]` into that request's `cursor` field.",
       |app, params|
       #[serde(deny_unknown_fields)]
       {
-        #[schemars(description = "News source requests. Each item contains a source endpoint URL and optional cursor.")]
+        #[schemars(description = "News source requests. Each item contains a source endpoint URL and optional cursor for paginated loading.")]
         requests: Vec<McpNewsPostRequest>,
       } => async move {
         let requests = params
