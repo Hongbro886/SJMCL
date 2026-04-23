@@ -3,7 +3,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LuEye } from "react-icons/lu";
+import { LuBookDashed, LuEye } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -11,6 +11,7 @@ import Empty from "@/components/common/empty";
 import { OptionItem, OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
 import ViewSchematicModal from "@/components/modals/view-schematic-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { InstanceSubdirType } from "@/enums/instance";
@@ -53,6 +54,22 @@ const InstanceSchematicsPage = () => {
     getSchematicListWrapper();
   }, [getSchematicListWrapper]);
 
+  useFileDnD({
+    extensions: ["schematic", "litematic"],
+    titleKey: "InstanceSchematicsPage.fileDnD.title",
+    descKey: "InstanceSchematicsPage.fileDnD.desc",
+    icon: LuBookDashed,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.schematics"),
+        filterExt: ["schematic", "litematic"],
+        tgtDirType: InstanceSubdirType.Schematics,
+        path,
+        onSuccessCallback: () => getSchematicListWrapper(true),
+      });
+    },
+  });
+
   const schemSecMenuOperations = [
     {
       icon: "openFolder",
@@ -67,7 +84,6 @@ const InstanceSchematicsPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.schematics"),
           filterExt: ["schematic", "litematic"],
           tgtDirType: InstanceSubdirType.Schematics,
-          decompress: false,
           onSuccessCallback: () => getSchematicListWrapper(true),
         });
       },

@@ -91,7 +91,6 @@ const InstanceShaderPacksPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
           filterExt: ["zip"],
           tgtDirType: InstanceSubdirType.ShaderPacks,
-          decompress: false,
           onSuccessCallback: () => getShaderPackListWrapper(true),
         });
       },

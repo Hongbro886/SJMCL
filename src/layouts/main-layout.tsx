@@ -345,7 +345,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   );
 };
 
-// support modpack import by DnD on the whole main-layout
+// support modpack and extension import by DnD on the whole main-layout level
 const MainLayoutFileDnD = () => {
   const { openSharedModal } = useSharedModals();
   const { handleAddExtension } = useExtensionHost();

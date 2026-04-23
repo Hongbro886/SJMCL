@@ -114,6 +114,12 @@
       }
     }
   },
+  "MainLayout": {
+    "fileDnD": {
+      "title": "Import Modpack",
+      "desc": "Import modpack file {{fileName}} to SJMCL"
+    }
+  },
   "AddAuthServerModal": {
     "header": {
       "title": "Add Authentication Server"
@@ -828,6 +834,10 @@
   },
   "ExtensionSettingsPage": {
     "alert": "SJMCL cannot control the behavior of third-party extensions, including how they handle your personal data. Only install and enable extensions from trusted sources.",
+    "fileDnD": {
+      "title": "Add SJMCL Extension",
+      "desc": "Install extension file {{fileName}} to SJMCL"
+    },
     "installed": "Installed Extensions",
     "menu": {
       "info": "Extension Info"
@@ -1430,6 +1440,10 @@
     }
   },
   "InstanceModsPage": {
+    "fileDnD": {
+      "title": "Add Mods",
+      "desc": "Install mod file {{fileName}} to this instance"
+    },
     "modLoaderList": {
       "title": "Mod Loader",
       "notInstalled": "Not Installed",
@@ -1456,6 +1470,10 @@
     }
   },
   "InstanceSchematicsPage": {
+    "fileDnD": {
+      "title": "Add Schematics",
+      "desc": "Install schematic file {{fileName}} to this instance"
+    },
     "schematicList": {
       "title": "Schematics",
       "preview": "Preview"

@@ -114,6 +114,12 @@
       }
     }
   },
+  "MainLayout": {
+    "fileDnD": {
+      "title": "导入整合包",
+      "desc": "将整合包文件 {{fileName}} 导入到 SJMCL"
+    }
+  },
   "AddAuthServerModal": {
     "header": {
       "title": "添加认证服务器"
@@ -828,6 +834,10 @@
   },
   "ExtensionSettingsPage": {
     "alert": "SJMCL 无法控制第三方扩展的行为，包括它们如何管理你的个人数据。请仅安装并启用来自可信来源的扩展。",
+    "fileDnD": {
+      "title": "添加 SJMCL 扩展",
+      "desc": "将扩展文件 {{fileName}} 安装到 SJMCL"
+    },
     "installed": "已安装扩展",
     "menu": {
       "info": "查看信息"
@@ -1430,6 +1440,10 @@
     }
   },
   "InstanceModsPage": {
+    "fileDnD": {
+      "title": "添加模组",
+      "desc": "将模组文件 {{fileName}} 安装到当前实例"
+    },
     "modLoaderList": {
       "title": "加载器",
       "notInstalled": "未安装",
@@ -1456,6 +1470,10 @@
     }
   },
   "InstanceSchematicsPage": {
+    "fileDnD": {
+      "title": "添加原理图",
+      "desc": "将原理图文件 {{fileName}} 安装到当前实例"
+    },
     "schematicList": {
       "title": "原理图",
       "preview": "预览"

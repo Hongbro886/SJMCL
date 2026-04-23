@@ -112,7 +112,6 @@ const InstanceResourcePacksPage = () => {
               ),
               filterExt: ["zip"],
               tgtDirType: InstanceSubdirType.ResourcePacks,
-              decompress: false,
               onSuccessCallback: () => getResourcePackListWrapper(true),
             });
           },

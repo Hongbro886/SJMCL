@@ -212,6 +212,7 @@ export const InstanceContextProvider: React.FC<{
     filterName: string;
     filterExt: string[];
     tgtDirType: InstanceSubdirType;
+    path?: string;
     decompress?: boolean;
     onSuccessCallback: () => void;
   };
@@ -222,19 +223,24 @@ export const InstanceContextProvider: React.FC<{
         filterName,
         filterExt,
         tgtDirType,
+        path,
         decompress = false,
         onSuccessCallback,
       } = options;
       if (instanceId !== undefined) {
-        open({
-          multiple: false,
-          filters: [
-            {
-              name: filterName,
-              extensions: filterExt,
-            },
-          ],
-        }).then((selectedPath) => {
+        const selectedPathPromise = path
+          ? Promise.resolve(path)
+          : open({
+              multiple: false,
+              filters: [
+                {
+                  name: filterName,
+                  extensions: filterExt,
+                },
+              ],
+            });
+
+        selectedPathPromise.then((selectedPath) => {
           if (!selectedPath) return;
           InstanceService.copyResourceToInstances(
             selectedPath,
