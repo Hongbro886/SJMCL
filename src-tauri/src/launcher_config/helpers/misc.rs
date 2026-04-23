@@ -111,6 +111,11 @@ impl LauncherConfig {
       allow_full_login_feature: false,
     };
 
+    log::info!(
+      "Launcher basic info: {}",
+      serde_json::to_string(&self.basic_info).unwrap_or_else(|_| format!("{:?}", self.basic_info))
+    );
+
     Ok(())
   }
 
