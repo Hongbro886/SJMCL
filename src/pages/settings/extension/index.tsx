@@ -42,16 +42,11 @@ const ExtensionSettingsPage = () => {
     enabledExtensionList,
     getExtensionList,
     getExtensionSettingsPage,
+    handleAddExtension,
   } = useExtensionHost();
   const extensions = extensionList || [];
 
-  const handleOpenExtensionsFolder = async () => {
-    const base = await appDataDir();
-    const extensionsDir = await join(base, "UserContent", "Extensions");
-    await openPath(extensionsDir);
-  };
-
-  const handleAddExtension = async () => {
+  const handleBrowse = async () => {
     const selectedPath = await open({
       multiple: false,
       filters: [
@@ -62,21 +57,13 @@ const ExtensionSettingsPage = () => {
       ],
     });
     if (!selectedPath || Array.isArray(selectedPath)) return;
+    await handleAddExtension(selectedPath);
+  };
 
-    const response = await ExtensionService.addExtension(selectedPath);
-    if (response.status === "success") {
-      toast({
-        title: response.message,
-        status: "success",
-      });
-      getExtensionList(true);
-    } else {
-      toast({
-        title: response.message,
-        description: response.details,
-        status: "error",
-      });
-    }
+  const handleOpenExtensionsFolder = async () => {
+    const base = await appDataDir();
+    const extensionsDir = await join(base, "UserContent", "Extensions");
+    await openPath(extensionsDir);
   };
 
   const setExtensionEnabled = (identifier: string, enable: boolean) => {
@@ -149,7 +136,7 @@ const ExtensionSettingsPage = () => {
     },
     {
       icon: "add",
-      onClick: handleAddExtension,
+      onClick: handleBrowse,
     },
     {
       icon: "refresh",
@@ -202,9 +189,7 @@ const ExtensionSettingsPage = () => {
       {
         icon: "delete",
         danger: true,
-        onClick: () => {
-          handleDeleteExtension(extension.identifier);
-        },
+        onClick: () => handleDeleteExtension(extension.identifier),
       },
     ];
   };

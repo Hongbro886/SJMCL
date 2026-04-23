@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Center,
   Flex,
@@ -17,7 +18,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
-import { LuLanguages, LuScrollText } from "react-icons/lu";
+import {
+  LuGrid2X2Plus,
+  LuLanguages,
+  LuPackagePlus,
+  LuScrollText,
+} from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import AdvancedCard from "@/components/common/advanced-card";
 import DevToolbar from "@/components/dev/dev-toolbar";
@@ -26,7 +32,12 @@ import LanguageMenu from "@/components/language-menu";
 import MainWindowTitlebar from "@/components/main-window-titlebar";
 import StarUsModal from "@/components/modals/star-us-modal";
 import WelcomeAndTermsModal from "@/components/modals/welcome-and-terms-modal";
+import {
+  FileDnDProvider,
+  useFileDnD,
+} from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
+import { useExtensionHost } from "@/contexts/extension/host";
 import { useSharedModals } from "@/contexts/shared-modal";
 import { isDev } from "@/utils/env";
 
@@ -293,31 +304,71 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       style={getGlobalExtraStyle(config)}
     >
       <MainWindowTitlebar />
-      <HeadNavBar />
-      {router.pathname === "/launch" ? (
-        <>{children}</>
-      ) : (
-        <AdvancedCard
-          level="back"
-          h="100%"
-          overflow="auto"
-          mt={1}
-          mb={4}
-          mx={4}
-        >
-          {children}
-        </AdvancedCard>
-      )}
+      <Box
+        position="relative"
+        display="flex"
+        flex="1"
+        flexDir="column"
+        minH={0}
+      >
+        <FileDnDProvider>
+          <MainLayoutFileDnD />
+          <HeadNavBar />
+          {router.pathname === "/launch" ? (
+            <>{children}</>
+          ) : (
+            <AdvancedCard
+              level="back"
+              flex="1"
+              overflow="auto"
+              mt={1}
+              mb={4}
+              mx={4}
+            >
+              {children}
+            </AdvancedCard>
+          )}
 
-      <WelcomeAndTermsModal
-        isOpen={isWelcomeAndTermsModalOpen}
-        onClose={onWelcomeAndTermsModalClose}
-      />
-      <StarUsModal isOpen={isStarUsModalOpen} onClose={onStarUsModalClose} />
+          <WelcomeAndTermsModal
+            isOpen={isWelcomeAndTermsModalOpen}
+            onClose={onWelcomeAndTermsModalClose}
+          />
+          <StarUsModal
+            isOpen={isStarUsModalOpen}
+            onClose={onStarUsModalClose}
+          />
 
-      {isDev && <DevToolbar />}
+          {isDev && <DevToolbar />}
+        </FileDnDProvider>
+      </Box>
     </Flex>
   );
+};
+
+// support modpack import by DnD on the whole main-layout
+const MainLayoutFileDnD = () => {
+  const { openSharedModal } = useSharedModals();
+  const { handleAddExtension } = useExtensionHost();
+
+  useFileDnD({
+    extensions: ["zip", "mrpack"],
+    titleKey: "MainLayout.fileDnD.title",
+    descKey: "MainLayout.fileDnD.desc",
+    icon: LuPackagePlus,
+    onDrop: async (path) => {
+      openSharedModal("import-modpack", { path });
+    },
+  });
+
+  useFileDnD({
+    extensions: ["sjmclx"],
+    titleKey: "ExtensionSettingsPage.fileDnD.title",
+    descKey: "ExtensionSettingsPage.fileDnD.desc",
+    icon: LuGrid2X2Plus,
+    onDrop: handleAddExtension,
+  });
+
+  return null;
 };
 
 export default MainLayout;
