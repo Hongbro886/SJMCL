@@ -341,15 +341,23 @@ const HomeWidgetContainer = ({ maxWidth }: HomeWidgetContainerProps) => {
     [persistHomeWidgetState]
   );
 
-  const handleMoveWidgetUp = useCallback(
-    (widgetIdentifier: string) => {
+  const handleMoveWidget = useCallback(
+    (widgetIdentifier: string, direction: -1 | 1) => {
       const currentOrder = [...orderedWidgetIdentifiers];
       const currentIndex = currentOrder.indexOf(widgetIdentifier);
-      if (currentIndex <= 0) return;
+      const nextIndex = currentIndex + direction;
 
-      [currentOrder[currentIndex - 1], currentOrder[currentIndex]] = [
+      if (
+        currentIndex < 0 ||
+        nextIndex < 0 ||
+        nextIndex >= currentOrder.length
+      ) {
+        return;
+      }
+
+      [currentOrder[currentIndex], currentOrder[nextIndex]] = [
+        currentOrder[nextIndex],
         currentOrder[currentIndex],
-        currentOrder[currentIndex - 1],
       ];
 
       widgetOrderRef.current = currentOrder;
@@ -365,6 +373,8 @@ const HomeWidgetContainer = ({ maxWidth }: HomeWidgetContainerProps) => {
   );
 
   const topWidgetIdentifier = orderedWidgetIdentifiers[0];
+  const bottomWidgetIdentifier =
+    orderedWidgetIdentifiers[orderedWidgetIdentifiers.length - 1];
 
   const shouldHideWidgetList =
     config.mocked || homeWidgets.length === 0 || !isHydrated;
@@ -409,7 +419,9 @@ const HomeWidgetContainer = ({ maxWidth }: HomeWidgetContainerProps) => {
                 handleWidgetCollapsedChange(widget.identifier, collapsed)
               }
               canMoveUp={widget.identifier !== topWidgetIdentifier}
-              onMoveUp={() => handleMoveWidgetUp(widget.identifier)}
+              onMoveUp={() => handleMoveWidget(widget.identifier, -1)}
+              canMoveDown={widget.identifier !== bottomWidgetIdentifier}
+              onMoveDown={() => handleMoveWidget(widget.identifier, 1)}
             />
           ))}
         </VStack>
