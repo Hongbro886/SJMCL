@@ -141,6 +141,7 @@ interface ExtensionHostContextType {
   ) => ExtensionPageContribution | undefined;
   // host control methods.
   getExtensionList: (sync?: boolean) => ExtensionInfo[] | undefined;
+  handleAddExtension: (path: string) => Promise<void>;
 }
 
 const ExtensionHostContext = createContext<
@@ -546,6 +547,29 @@ export const ExtensionHostContextProvider: React.FC<{
   const getExtensionList = useGetState(
     extensionList,
     handleRetrieveExtensionList
+  );
+
+  const handleAddExtension = useCallback(
+    async (path: string) => {
+      const response = await ExtensionService.addExtension(path);
+      if (response.status === "success") {
+        getExtensionList(true);
+        if (router.asPath !== "/settings/extension") {
+          router.push("/settings/extension");
+        }
+        toast({
+          title: response.message,
+          status: "success",
+        });
+      } else {
+        toast({
+          title: response.message,
+          description: response.details,
+          status: "error",
+        });
+      }
+    },
+    [getExtensionList, router, toast]
   );
 
   useEffect(() => {
@@ -1315,6 +1339,7 @@ export const ExtensionHostContextProvider: React.FC<{
       getExtensionSettingsPage,
       getExtensionPage,
       getExtensionList,
+      handleAddExtension,
     }),
     [
       config,
@@ -1331,6 +1356,7 @@ export const ExtensionHostContextProvider: React.FC<{
       getExtensionSettingsPage,
       getExtensionPage,
       getExtensionList,
+      handleAddExtension,
     ]
   );
 

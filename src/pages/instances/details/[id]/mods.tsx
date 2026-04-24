@@ -24,6 +24,7 @@ import {
   LuCircleMinus,
   LuClockArrowUp,
   LuSearch,
+  LuSquareLibrary,
   LuTriangleAlert,
   LuX,
 } from "react-icons/lu";
@@ -41,6 +42,7 @@ import {
 import { ChangeLoaderModal } from "@/components/modals/change-loader-modal";
 import CheckModUpdateModal from "@/components/modals/check-mod-update-modal";
 import ModInfoModal from "@/components/modals/mod-info-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -186,6 +188,24 @@ const InstanceModsPage = () => {
     if (isSearching) searchInputRef.current?.focus();
   }, [isSearching]);
 
+  useFileDnD({
+    extensions: ["jar"],
+    titleKey: "InstanceModsPage.fileDnD.title",
+    descKey: "InstanceModsPage.fileDnD.desc",
+    icon: LuSquareLibrary,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.mods"),
+        filterExt: ["jar", "disabled"],
+        tgtDirType: InstanceSubdirType.Mods,
+        path,
+        onSuccessCallback: () => {
+          getLocalModListWrapper(true);
+        },
+      });
+    },
+  });
+
   const handleClearSearch = () => {
     setQuery("");
     setIsSearching(false);
@@ -300,7 +320,6 @@ const InstanceModsPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.mods"),
           filterExt: ["zip", "jar", "disabled"],
           tgtDirType: InstanceSubdirType.Mods,
-          decompress: false,
           onSuccessCallback: () => {
             getLocalModListWrapper(true);
           },

@@ -11,7 +11,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LuCheck, LuX } from "react-icons/lu";
+import { LuCheck, LuEarth, LuX } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -20,6 +20,7 @@ import { OptionItem, OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
 import AddGameServerModal from "@/components/modals/add-game-server-modal";
 import WorldLevelDataModal from "@/components/modals/world-level-data-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -78,6 +79,23 @@ const InstanceWorldsPage = () => {
   useEffect(() => {
     getWorldListWrapper();
   }, [getWorldListWrapper]);
+
+  useFileDnD({
+    extensions: ["zip"],
+    titleKey: "InstanceWorldsPage.fileDnD.title",
+    descKey: "InstanceWorldsPage.fileDnD.desc",
+    icon: LuEarth,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.worlds"),
+        filterExt: ["zip"],
+        tgtDirType: InstanceSubdirType.Saves,
+        path,
+        decompress: true,
+        onSuccessCallback: () => getWorldListWrapper(true),
+      });
+    },
+  });
 
   const handleRetrieveGameServerList = useCallback(
     (queryOnline: boolean) => {

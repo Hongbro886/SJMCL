@@ -29,7 +29,7 @@
         "decorations": true,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "dragDropEnabled": false,
+        "dragDropEnabled": true,
         "trafficLightPosition": {
           "x": 12,
           "y": 12

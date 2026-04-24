@@ -114,6 +114,12 @@
       }
     }
   },
+  "MainLayout": {
+    "fileDnD": {
+      "title": "Import Modpack",
+      "desc": "Import modpack file {{fileName}} to SJMCL"
+    }
+  },
   "AddAuthServerModal": {
     "header": {
       "title": "Add Authentication Server"
@@ -828,6 +834,10 @@
   },
   "ExtensionSettingsPage": {
     "alert": "SJMCL cannot control the behavior of third-party extensions, including how they handle your personal data. Only install and enable extensions from trusted sources.",
+    "fileDnD": {
+      "title": "Install SJMCL Extension",
+      "desc": "Install extension file {{fileName}} to SJMCL"
+    },
     "installed": "Installed Extensions",
     "menu": {
       "info": "Extension Info"
@@ -1430,6 +1440,10 @@
     }
   },
   "InstanceModsPage": {
+    "fileDnD": {
+      "title": "Install Mods",
+      "desc": "Install mod file {{fileName}} to this instance"
+    },
     "modLoaderList": {
       "title": "Mod Loader",
       "notInstalled": "Not Installed",
@@ -1448,6 +1462,10 @@
     }
   },
   "InstanceResourcePacksPage": {
+    "fileDnD": {
+      "title": "Add Resource Packs",
+      "desc": "Add resource pack file {{fileName}} to this instance"
+    },
     "resourcePackList": {
       "title": "Global Resource Packs"
     },
@@ -1456,6 +1474,10 @@
     }
   },
   "InstanceSchematicsPage": {
+    "fileDnD": {
+      "title": "Add Schematics",
+      "desc": "Add schematic file {{fileName}} to this instance"
+    },
     "schematicList": {
       "title": "Schematics"
     }
@@ -1484,6 +1506,10 @@
     }
   },
   "InstanceShaderPacksPage": {
+    "fileDnD": {
+      "title": "Add Shader Packs",
+      "desc": "Add shader pack file {{fileName}} to this instance"
+    },
     "shaderLoaderList": {
       "title": "Loaders",
       "notInstalled": "Not Installed"
@@ -1515,6 +1541,10 @@
     }
   },
   "InstanceWorldsPage": {
+    "fileDnD": {
+      "title": "Add Worlds",
+      "desc": "Add save file {{fileName}} to this instance"
+    },
     "worldList": {
       "title": "Worlds",
       "lastPlayedAt": "Last played",

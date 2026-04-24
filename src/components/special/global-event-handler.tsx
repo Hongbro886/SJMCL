@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useCallback, useMemo } from "react";
 import { useSharedModals } from "@/contexts/shared-modal";
 import useDeepLink from "@/hooks/deep-link";
-import { useDragAndDrop } from "@/hooks/drag-and-drop";
 import useKeyboardShortcut from "@/hooks/keyboard-shortcut";
 
 // Handle global keyboard shortcuts, DnD events, etc.
@@ -31,28 +30,27 @@ const GlobalEventHandler: React.FC<{ children: React.ReactNode }> = ({
 
   // ------------------- Drag and Drops -------------------
 
-  const addAuthServerByDnD = useCallback(
-    (data: string) => {
-      const prefix = "authlib-injector:yggdrasil-server:";
-      if (data.startsWith(prefix)) {
-        const url = data.slice(prefix.length);
-        const decodeUrl = decodeURIComponent(url);
-        if (!isStandAlone && decodeUrl)
-          openSharedModal("add-auth-server", { presetUrl: decodeUrl });
-      }
-    },
-    [isStandAlone, openSharedModal]
-  );
-
-  useDragAndDrop({
-    onDrop: addAuthServerByDnD,
-  });
-
+  // Disabled for now to avoid competing with the global file-drop flow.
   // KNOWN ISSUE: https://github.com/tauri-apps/tauri/issues/14055
-  // useTauriFileDrop({
-  //   pattern: "\\.zip$",
-  //   onMatch: (path) => openSharedModal("import-modpack", { path }),
+
+  // const addAuthServerByDnD = useCallback(
+  //   (data: string) => {
+  //     const prefix = "authlib-injector:yggdrasil-server:";
+  //     if (data.startsWith(prefix)) {
+  //       const url = data.slice(prefix.length);
+  //       const decodeUrl = decodeURIComponent(url);
+  //       if (!isStandAlone && decodeUrl)
+  //         openSharedModal("add-auth-server", { presetUrl: decodeUrl });
+  //     }
+  //   },
+  //   [isStandAlone, openSharedModal]
+  // );
+  //
+  // useDragAndDrop({
+  //   onDrop: addAuthServerByDnD,
   // });
+
+  // File drops are now handled by FileDnDOverlay.
 
   // ---------------------- Deeplinks ---------------------
 

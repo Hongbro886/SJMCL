@@ -20,7 +20,7 @@ import {
   LuHaze,
   LuHouse,
   LuPackage,
-  LuPackagePlus,
+  LuPackageOpen,
   LuPlay,
   LuSettings,
   LuSquareLibrary,
@@ -130,7 +130,7 @@ const InstanceDetailsLayoutContent: React.FC<{ children: React.ReactNode }> = ({
       },
     },
     {
-      icon: LuPackagePlus,
+      icon: LuPackageOpen,
       label: t("InstanceDetailsLayout.secMenu.exportModPack"),
       danger: false,
       onClick: () => {

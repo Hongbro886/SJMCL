@@ -2,6 +2,7 @@ import { Center, HStack, useDisclosure } from "@chakra-ui/react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LuHaze } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -12,6 +13,7 @@ import SelectableCard, {
   SelectableCardProps,
 } from "@/components/common/selectable-card";
 import { ChangeLoaderModal } from "@/components/modals/change-loader-modal";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -58,6 +60,22 @@ const InstanceShaderPacksPage = () => {
     getShaderPackListWrapper();
   }, [getShaderPackListWrapper]);
 
+  useFileDnD({
+    extensions: ["zip"],
+    titleKey: "InstanceShaderPacksPage.fileDnD.title",
+    descKey: "InstanceShaderPacksPage.fileDnD.desc",
+    icon: LuHaze,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
+        filterExt: ["zip"],
+        tgtDirType: InstanceSubdirType.ShaderPacks,
+        path,
+        onSuccessCallback: () => getShaderPackListWrapper(true),
+      });
+    },
+  });
+
   useEffect(() => {
     const unlisten = ResourceService.onResourceRefresh(
       (payload: OtherResourceType) => {
@@ -91,7 +109,6 @@ const InstanceShaderPacksPage = () => {
           filterName: t("InstanceDetailsLayout.instanceTabList.shaderpacks"),
           filterExt: ["zip"],
           tgtDirType: InstanceSubdirType.ShaderPacks,
-          decompress: false,
           onSuccessCallback: () => getShaderPackListWrapper(true),
         });
       },

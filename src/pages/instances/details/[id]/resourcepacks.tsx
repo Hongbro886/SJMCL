@@ -2,6 +2,7 @@ import { Center, HStack, Image } from "@chakra-ui/react";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LuPackage } from "react-icons/lu";
 import { BeatLoader } from "react-spinners";
 import { CommonIconButton } from "@/components/common/common-icon-button";
 import CountTag from "@/components/common/count-tag";
@@ -9,6 +10,7 @@ import Empty from "@/components/common/empty";
 import { FormattedMCText } from "@/components/common/formatted-mc-text";
 import { OptionItem, OptionItemGroup } from "@/components/common/option-item";
 import { Section } from "@/components/common/section";
+import { useFileDnD } from "@/components/special/file-dnd-overlay";
 import { useLauncherConfig } from "@/contexts/config";
 import { useInstanceSharedData } from "@/contexts/instance";
 import { useSharedModals } from "@/contexts/shared-modal";
@@ -69,6 +71,22 @@ const InstanceResourcePacksPage = () => {
     getServerResourcePackListWrapper();
   }, [getServerResourcePackListWrapper]);
 
+  useFileDnD({
+    extensions: ["zip"],
+    titleKey: "InstanceResourcePacksPage.fileDnD.title",
+    descKey: "InstanceResourcePacksPage.fileDnD.desc",
+    icon: LuPackage,
+    onDrop: async (path) => {
+      handleImportResource({
+        filterName: t("InstanceDetailsLayout.instanceTabList.resourcepacks"),
+        filterExt: ["zip"],
+        tgtDirType: InstanceSubdirType.ResourcePacks,
+        path,
+        onSuccessCallback: () => getResourcePackListWrapper(true),
+      });
+    },
+  });
+
   useEffect(() => {
     const unlisten = ResourceService.onResourceRefresh(
       (payload: OtherResourceType) => {
@@ -112,7 +130,6 @@ const InstanceResourcePacksPage = () => {
               ),
               filterExt: ["zip"],
               tgtDirType: InstanceSubdirType.ResourcePacks,
-              decompress: false,
               onSuccessCallback: () => getResourcePackListWrapper(true),
             });
           },
