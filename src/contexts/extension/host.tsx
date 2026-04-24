@@ -163,6 +163,16 @@ export const normalizeExtensionRelativePath = (
   return normalized;
 };
 
+const stripParentPathSegments = (route: string) =>
+  route.replace(
+    /^[^?#]*/,
+    (pathname) =>
+      pathname
+        .split("/")
+        .filter((segment) => segment !== "..")
+        .join("/") || "/"
+  );
+
 // standalone extension page uses query params due to Next.js static export limits.
 export const convertExtensionRouteForStandalone = (route: string) => {
   if (!route.startsWith("/standalone/extension/")) {
@@ -195,9 +205,10 @@ export const createStandaloneExtensionRouteUrl = (
     ?.replace(/\\/g, "/")
     .trim()
     .replace(/^\/+/, "");
-
   return new URL(
-    normalizedRoutePath ? `/${normalizedRoutePath}` : "/",
+    stripParentPathSegments(
+      normalizedRoutePath ? `/${normalizedRoutePath}` : "/"
+    ),
     "https://launcher.local"
   );
 };
@@ -208,6 +219,49 @@ const isInternalLauncherRoute = (route: string) => {
     !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(route) &&
     !route.startsWith("//")
   );
+};
+
+const resolveExtensionNavigationRoute = (
+  extension: ExtensionInfo,
+  route: string,
+  isToStandalone: boolean // true if navigating from main window to standalone window, false for other cases
+) => {
+  const trimmedRoute = route.trim().replace(/\\/g, "/");
+  const internalRoute = stripParentPathSegments(
+    trimmedRoute.startsWith("/") ? trimmedRoute : `/${trimmedRoute}`
+  );
+
+  const isCurrentStandalonePage =
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/standalone/");
+
+  const isValid = !(
+    !isInternalLauncherRoute(trimmedRoute) ||
+    (isToStandalone
+      ? !internalRoute.startsWith("/standalone/")
+      : isCurrentStandalonePage
+        ? !internalRoute.startsWith("/standalone/")
+        : internalRoute.startsWith("/standalone/")) ||
+    (internalRoute.startsWith("/settings/extension/") &&
+      !internalRoute.startsWith(
+        `/settings/extension/${extension.identifier}`
+      )) ||
+    (internalRoute.startsWith("/extension/") &&
+      !internalRoute.startsWith(`/extension/${extension.identifier}`)) ||
+    (internalRoute.startsWith("/standalone/extension/") &&
+      !internalRoute.startsWith(
+        `/standalone/extension/${extension.identifier}`
+      )) ||
+    (internalRoute.startsWith("/standalone/extension?") &&
+      !internalRoute.startsWith(
+        `/standalone/extension?identifier=${encodeURIComponent(extension.identifier)}`
+      ))
+  );
+
+  if (!isValid) {
+    return undefined;
+  }
+  return convertExtensionRouteForStandalone(internalRoute);
 };
 
 // generate a unique token for each extension activation process.
@@ -370,71 +424,30 @@ export const ExtensionHostContextProvider: React.FC<{
 
   const navigate = useCallback(
     async (extension: ExtensionInfo, route: string) => {
-      const trimmedRoute = route.trim().replace(/\\/g, "/");
-      const internalRoute = trimmedRoute.startsWith("/")
-        ? trimmedRoute
-        : `/${trimmedRoute}`;
-      const isCurrentStandalonePage =
-        typeof window !== "undefined" &&
-        window.location.pathname.startsWith("/standalone/");
-
-      if (
-        !isInternalLauncherRoute(trimmedRoute) ||
-        (isCurrentStandalonePage
-          ? !internalRoute.startsWith("/standalone/")
-          : internalRoute.startsWith("/standalone/")) ||
-        (internalRoute.startsWith("/settings/extension/") &&
-          !internalRoute.startsWith(
-            `/settings/extension/${extension.identifier}`
-          )) ||
-        (internalRoute.startsWith("/extension/") &&
-          !internalRoute.startsWith(`/extension/${extension.identifier}`)) ||
-        (internalRoute.startsWith("/standalone/extension/") &&
-          !internalRoute.startsWith(
-            `/standalone/extension/${extension.identifier}`
-          )) ||
-        (internalRoute.startsWith("/standalone/extension?") &&
-          !internalRoute.startsWith(
-            `/standalone/extension?identifier=${encodeURIComponent(extension.identifier)}`
-          ))
-      ) {
+      const nextRoute = resolveExtensionNavigationRoute(
+        extension,
+        route,
+        false
+      );
+      if (!nextRoute) {
         throw new Error(`Invalid route: ${route}`);
       }
 
-      await router.push(convertExtensionRouteForStandalone(internalRoute));
+      await router.push(nextRoute);
     },
     [router]
   );
 
   const openWindow = useCallback(
     (extension: ExtensionInfo, route: string, title: string) => {
-      const trimmedRoute = route.trim().replace(/\\/g, "/");
-      const internalRoute = trimmedRoute.startsWith("/")
-        ? trimmedRoute
-        : `/${trimmedRoute}`;
-
-      if (
-        !isInternalLauncherRoute(trimmedRoute) ||
-        !internalRoute.startsWith("/standalone/") ||
-        (internalRoute.startsWith("/standalone/extension/") &&
-          !internalRoute.startsWith(
-            `/standalone/extension/${extension.identifier}`
-          )) ||
-        (internalRoute.startsWith("/standalone/extension?") &&
-          !internalRoute.startsWith(
-            `/standalone/extension?identifier=${encodeURIComponent(extension.identifier)}`
-          ))
-      ) {
+      const nextRoute = resolveExtensionNavigationRoute(extension, route, true);
+      if (!nextRoute) {
         throw new Error(`Invalid route: ${route}`);
       }
 
-      createWindow(
-        `extension_standalone_${Date.now()}`,
-        convertExtensionRouteForStandalone(internalRoute),
-        {
-          title: `${title} - ${extension.name}`,
-        }
-      );
+      createWindow(`extension_standalone_${Date.now()}`, nextRoute, {
+        title: `${title} - ${extension.name}`,
+      });
     },
     []
   );
@@ -822,15 +835,16 @@ export const ExtensionHostContextProvider: React.FC<{
       updateConfig: (path, value) =>
         hostActionRefs.current.updateConfig(path, value),
       navigate: async (route: string) => await navigate(extension, route),
+      navBack: () => router.back(),
       openWindow: (route: string, title: string) =>
         openWindow(extension, route, title),
       openExternalLink: async (url: string) =>
         await openExternalLink(extension, url),
+      openSharedModal: (key, params) =>
+        hostActionRefs.current.openSharedModal(key, params),
       request,
       requestText,
       invoke,
-      openSharedModal: (key, params) =>
-        hostActionRefs.current.openSharedModal(key, params),
       readFile: async (path: string) =>
         runExtensionFileCommand(extension, path, UtilsService.readFile),
       writeFile: async (path: string, content: string) => {
@@ -862,6 +876,7 @@ export const ExtensionHostContextProvider: React.FC<{
       navigate,
       openExternalLink,
       openWindow,
+      router,
       request,
       requestText,
       runExtensionFileCommand,
